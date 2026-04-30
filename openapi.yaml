@@ -1,0 +1,325 @@
+openapi: 3.0.3
+info:
+  title: Anonymous Group Chat API
+  version: 1.0.0
+  description: REST API for anonymous group chat management, moderation, and reporting.
+servers:
+  - url: http://localhost:4000
+paths:
+  /api/groups:
+    post:
+      summary: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+            example:
+              name: Study Group
+      responses:
+        "201":
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+              example:
+                id: 1
+                groupCode: AB12CD34
+                name: Study Group
+                isActive: true
+                createdAt: "2026-04-29T12:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /api/groups/{groupCode}:
+    get:
+      summary: Get group details by group code
+      parameters:
+        - in: path
+          name: groupCode
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Group"
+                  - type: object
+                    properties:
+                      _count:
+                        type: object
+                        properties:
+                          messages:
+                            type: integer
+              example:
+                id: 1
+                groupCode: AB12CD34
+                name: Study Group
+                isActive: true
+                createdAt: "2026-04-29T12:00:00.000Z"
+                _count:
+                  messages: 12
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/groups/{groupCode}/messages:
+    get:
+      summary: List messages for a group
+      parameters:
+        - in: path
+          name: groupCode
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Messages fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      summary: Send a message to a group
+      parameters:
+        - in: path
+          name: groupCode
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nickname, content]
+              properties:
+                nickname:
+                  type: string
+                content:
+                  type: string
+            example:
+              nickname: SilentFox
+              content: Hello everyone
+      responses:
+        "201":
+          description: Message created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/messages/{messageId}/reports:
+    post:
+      summary: Report a message
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+            example:
+              reason: Offensive language
+      responses:
+        "201":
+          description: Report created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/admin/groups:
+    get:
+      summary: List all groups for admin
+      responses:
+        "200":
+          description: Groups fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Group"
+                    - type: object
+                      properties:
+                        _count:
+                          type: object
+                          properties:
+                            messages:
+                              type: integer
+  /api/admin/reports:
+    get:
+      summary: List all reports for admin
+      responses:
+        "200":
+          description: Reports fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Report"
+                    - type: object
+                      properties:
+                        message:
+                          $ref: "#/components/schemas/Message"
+  /api/admin/messages/{messageId}:
+    delete:
+      summary: Soft delete a message
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+            example:
+              reason: Violates moderation policy
+      responses:
+        "200":
+          description: Message soft deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/admin/groups/{groupId}:
+    delete:
+      summary: Deactivate a group
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+            example:
+              reason: Abuse complaints
+      responses:
+        "200":
+          description: Group deactivated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  schemas:
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+        groupCode:
+          type: string
+        name:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, groupCode, name, isActive, createdAt]
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        groupId:
+          type: integer
+        nickname:
+          type: string
+        content:
+          type: string
+        isDeleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, groupId, nickname, content, isDeleted, createdAt]
+    Report:
+      type: object
+      properties:
+        id:
+          type: integer
+        messageId:
+          type: integer
+        reason:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, messageId, reason, status, createdAt]
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Group name is required
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Group not found
