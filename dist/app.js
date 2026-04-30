@@ -16,6 +16,7 @@ const adminRoutes_1 = require("./routes/adminRoutes");
 const groupRoutes_1 = require("./routes/groupRoutes");
 const messageRoutes_1 = require("./routes/messageRoutes");
 const reportRoutes_1 = require("./routes/reportRoutes");
+const adminAuth_1 = require("./middleware/adminAuth");
 const errorHandler_1 = require("./middleware/errorHandler");
 const notFoundHandler_1 = require("./middleware/notFoundHandler");
 dotenv_1.default.config();
@@ -36,7 +37,7 @@ async function createApp() {
     app.use("/api/groups", groupRoutes_1.groupRoutes);
     app.use("/api/groups", messageRoutes_1.messageRoutes);
     app.use("/api/messages", reportRoutes_1.reportRoutes);
-    app.use("/api/admin", adminRoutes_1.adminRoutes);
+    app.use("/api/admin", adminAuth_1.adminAuth, adminRoutes_1.adminRoutes);
     app.use("/playground", graphqlPlaygroundRoutes_1.graphqlPlaygroundRoutes);
     app.use("/graphql", await (0, router_1.createGraphQLRouter)());
     app.use(notFoundHandler_1.notFoundHandler);

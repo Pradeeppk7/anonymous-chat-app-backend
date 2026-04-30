@@ -11,6 +11,7 @@ import { adminRoutes } from "./routes/adminRoutes";
 import { groupRoutes } from "./routes/groupRoutes";
 import { messageRoutes } from "./routes/messageRoutes";
 import { reportRoutes } from "./routes/reportRoutes";
+import { adminAuth } from "./middleware/adminAuth";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFoundHandler } from "./middleware/notFoundHandler";
 
@@ -39,7 +40,7 @@ export async function createApp() {
   app.use("/api/groups", groupRoutes);
   app.use("/api/groups", messageRoutes);
   app.use("/api/messages", reportRoutes);
-  app.use("/api/admin", adminRoutes);
+  app.use("/api/admin", adminAuth, adminRoutes);
   app.use("/playground", graphqlPlaygroundRoutes);
   app.use("/graphql", await createGraphQLRouter());
 

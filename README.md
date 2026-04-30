@@ -96,6 +96,11 @@ Endpoints:
 - `DELETE /api/admin/messages/:messageId`: soft delete a message
 - `DELETE /api/admin/groups/:groupId`: deactivate a group
 
+Admin endpoints are now protected by HTTP Basic auth. Use the credentials configured in `.env`:
+
+- `ADMIN_USERNAME=admin`
+- `ADMIN_PASSWORD=admin123`
+
 Error handling:
 
 - `400` for validation errors
@@ -127,6 +132,17 @@ mutation {
   }
 }
 ```
+
+## REST vs GraphQL Performance Analysis
+
+A dedicated comparison is available in [`performance-analysis.md`](./performance-analysis.md).
+
+High-level conclusion:
+
+- REST is generally faster for fixed, simple operations such as create, delete, and basic list endpoints
+- GraphQL is more flexible for complex reads because clients can fetch only the fields they need
+- both APIs share the same service and database layer, so the biggest differences come from GraphQL execution overhead and response flexibility
+- the main future optimization area is GraphQL nested query batching to avoid N+1 query patterns
 
 ## WebSocket Explanation
 
