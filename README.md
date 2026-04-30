@@ -246,24 +246,29 @@ Useful URLs:
 
 1. Create a new Web Service connected to your repository.
 2. Set the runtime to Node.
-3. Set the build command:
+3. Set the Root Directory to `backend`.
+4. Set the build command:
 
 ```bash
-npm install && npm run prisma:generate && npm run build
+npm install && npm run build
 ```
 
-4. Set the start command:
+The package now runs `prisma generate` automatically during `npm install` and before `npm run build`, which avoids deploying a Prisma client generated on Windows.
+
+5. Set the start command:
 
 ```bash
 npm start
 ```
 
-5. Add environment variables:
+6. Add environment variables:
 
 - `DATABASE_URL`
 - `PORT` if you want to override Render's default
 - `CORS_ORIGIN` for your allowed client origin
 
-6. Deploy the service.
+7. Deploy the service.
+
+If Render still shows a Prisma engine mismatch after this change, trigger a deploy that clears the build cache so the old generated client is not reused.
 
 For schema updates after deployment, run `npx prisma db push` or a migration job against the Neon database.

@@ -4,6 +4,8 @@
   "description": "Backend-only anonymous group chat API with REST, GraphQL, WebSocket, Prisma, PostgreSQL, OpenAPI, and CI.",
   "main": "dist/server.js",
   "scripts": {
+    "postinstall": "prisma generate",
+    "prebuild": "prisma generate",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
