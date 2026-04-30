@@ -78,5 +78,12 @@ exports.resolvers = {
                 createdAt: "desc"
             }
         })
+    },
+    Report: {
+        message: async (parent) => client_1.prisma.message.findUnique({
+            where: {
+                id: parent.messageId
+            }
+        })
     }
 };
