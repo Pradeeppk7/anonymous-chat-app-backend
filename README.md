@@ -173,6 +173,8 @@ Use it with Swagger UI locally:
 2. Open `http://localhost:4000/docs` for embedded Swagger UI.
 3. Or fetch `GET /openapi.yaml` and import it into Swagger Editor, Postman, or other API tooling.
 
+> Note: deployment to Azure App Service was not possible in this environment due to Azure subscription policy restrictions blocking the chosen resource configuration.
+
 ## GitHub Actions Explanation
 
 The CI workflow is defined in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
