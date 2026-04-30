@@ -1,10 +1,16 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMessage = deleteMessage;
 exports.deleteGroup = deleteGroup;
 exports.activateGroup = activateGroup;
 exports.hardDeleteGroup = hardDeleteGroup;
+exports.createAdmin = createAdmin;
+exports.authenticateAdmin = authenticateAdmin;
 const http_status_codes_1 = require("http-status-codes");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const client_1 = require("../prisma/client");
 const AppError_1 = require("../utils/AppError");
 function normalizeReason(reason) {
@@ -132,4 +138,26 @@ async function hardDeleteGroup(groupId, reason) {
         });
         return deletedGroup;
     });
+}
+async function createAdmin(username, password) {
+    const hashedPassword = await bcrypt_1.default.hash(password, 10);
+    return client_1.prisma.admin.create({
+        data: {
+            username,
+            password: hashedPassword
+        }
+    });
+}
+async function authenticateAdmin(username, password) {
+    const admin = await client_1.prisma.admin.findUnique({
+        where: { username }
+    });
+    if (!admin) {
+        throw new AppError_1.AppError("Invalid credentials", http_status_codes_1.StatusCodes.UNAUTHORIZED);
+    }
+    const isValid = await bcrypt_1.default.compare(password, admin.password);
+    if (!isValid) {
+        throw new AppError_1.AppError("Invalid credentials", http_status_codes_1.StatusCodes.UNAUTHORIZED);
+    }
+    return admin;
 }

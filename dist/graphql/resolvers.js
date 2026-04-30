@@ -45,7 +45,11 @@ exports.resolvers = {
         groups: async () => groupService.listGroups(),
         group: async (_parent, args) => groupService.getGroupByCode(args.groupCode),
         messages: async (_parent, args) => messageService.listMessages(args.groupCode),
-        reports: async () => reportService.listReports()
+        reports: async (_parent, _args, context) => {
+            if (!context.admin)
+                throw new Error("Unauthorized");
+            return reportService.listReports();
+        }
     },
     Mutation: {
         createGroup: async (_parent, args) => groupService.createGroup(args.name),
@@ -55,10 +59,26 @@ exports.resolvers = {
             return message;
         },
         reportMessage: async (_parent, args) => reportService.reportMessage(args.messageId, args.reason),
-        deleteMessage: async (_parent, args) => adminService.deleteMessage(args.messageId, args.reason),
-        deleteGroup: async (_parent, args) => adminService.deleteGroup(args.groupId, args.reason),
-        activateGroup: async (_parent, args) => adminService.activateGroup(args.groupId, args.reason),
-        hardDeleteGroup: async (_parent, args) => adminService.hardDeleteGroup(args.groupId, args.reason)
+        deleteMessage: async (_parent, args, context) => {
+            if (!context.admin)
+                throw new Error("Unauthorized");
+            return adminService.deleteMessage(args.messageId, args.reason);
+        },
+        deleteGroup: async (_parent, args, context) => {
+            if (!context.admin)
+                throw new Error("Unauthorized");
+            return adminService.deleteGroup(args.groupId, args.reason);
+        },
+        activateGroup: async (_parent, args, context) => {
+            if (!context.admin)
+                throw new Error("Unauthorized");
+            return adminService.activateGroup(args.groupId, args.reason);
+        },
+        hardDeleteGroup: async (_parent, args, context) => {
+            if (!context.admin)
+                throw new Error("Unauthorized");
+            return adminService.hardDeleteGroup(args.groupId, args.reason);
+        }
     },
     Group: {
         messages: async (parent) => client_1.prisma.message.findMany({

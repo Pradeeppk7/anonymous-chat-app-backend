@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-
-const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
-const adminPassword = process.env.ADMIN_PASSWORD;
+import { authenticateAdmin } from "../services/adminService";
 
 function unauthorized(res: Response) {
   return res
@@ -11,11 +9,7 @@ function unauthorized(res: Response) {
     .json({ error: "Invalid admin credentials." });
 }
 
-export function adminAuth(req: Request, res: Response, next: NextFunction) {
-  if (!adminPassword) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "Admin credentials are not configured." });
-  }
-
+export async function adminAuth(req: Request, res: Response, next: NextFunction) {
   const authorization = req.headers.authorization;
   if (!authorization || !authorization.startsWith("Basic ")) {
     return unauthorized(res);
@@ -25,9 +19,16 @@ export function adminAuth(req: Request, res: Response, next: NextFunction) {
   const decoded = Buffer.from(encoded, "base64").toString("utf-8");
   const [username, password] = decoded.split(":", 2);
 
-  if (username !== adminUsername || password !== adminPassword) {
+  if (!username || !password) {
     return unauthorized(res);
   }
 
-  return next();
+  try {
+    await authenticateAdmin(username, password);
+    return next();
+  } catch (error) {
+    return unauthorized(res);
+  }
 }
+
+export { authenticateAdmin };

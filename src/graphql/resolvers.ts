@@ -12,7 +12,10 @@ export const resolvers = {
       groupService.getGroupByCode(args.groupCode),
     messages: async (_parent: unknown, args: { groupCode: string }) =>
       messageService.listMessages(args.groupCode),
-    reports: async () => reportService.listReports()
+    reports: async (_parent: unknown, _args: unknown, context: { admin?: any }) => {
+      if (!context.admin) throw new Error("Unauthorized");
+      return reportService.listReports();
+    }
   },
   Mutation: {
     createGroup: async (_parent: unknown, args: { name: string }) => groupService.createGroup(args.name),
@@ -26,14 +29,22 @@ export const resolvers = {
     },
     reportMessage: async (_parent: unknown, args: { messageId: number; reason: string }) =>
       reportService.reportMessage(args.messageId, args.reason),
-    deleteMessage: async (_parent: unknown, args: { messageId: number; reason?: string }) =>
-      adminService.deleteMessage(args.messageId, args.reason),
-    deleteGroup: async (_parent: unknown, args: { groupId: number; reason?: string }) =>
-      adminService.deleteGroup(args.groupId, args.reason),
-    activateGroup: async (_parent: unknown, args: { groupId: number; reason?: string }) =>
-      adminService.activateGroup(args.groupId, args.reason),
-    hardDeleteGroup: async (_parent: unknown, args: { groupId: number; reason?: string }) =>
-      adminService.hardDeleteGroup(args.groupId, args.reason)
+    deleteMessage: async (_parent: unknown, args: { messageId: number; reason?: string }, context: { admin?: any }) => {
+      if (!context.admin) throw new Error("Unauthorized");
+      return adminService.deleteMessage(args.messageId, args.reason);
+    },
+    deleteGroup: async (_parent: unknown, args: { groupId: number; reason?: string }, context: { admin?: any }) => {
+      if (!context.admin) throw new Error("Unauthorized");
+      return adminService.deleteGroup(args.groupId, args.reason);
+    },
+    activateGroup: async (_parent: unknown, args: { groupId: number; reason?: string }, context: { admin?: any }) => {
+      if (!context.admin) throw new Error("Unauthorized");
+      return adminService.activateGroup(args.groupId, args.reason);
+    },
+    hardDeleteGroup: async (_parent: unknown, args: { groupId: number; reason?: string }, context: { admin?: any }) => {
+      if (!context.admin) throw new Error("Unauthorized");
+      return adminService.hardDeleteGroup(args.groupId, args.reason);
+    }
   },
   Group: {
     messages: async (parent: { id: number }) =>

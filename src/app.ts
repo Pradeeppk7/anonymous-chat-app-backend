@@ -40,7 +40,7 @@ export async function createApp() {
   app.use("/api/groups", groupRoutes);
   app.use("/api/groups", messageRoutes);
   app.use("/api/messages", reportRoutes);
-  app.use("/api/admin", adminAuth, adminRoutes);
+  app.use("/api/admin", (req, res, next) => adminAuth(req, res, next), adminRoutes);
   app.use("/playground", graphqlPlaygroundRoutes);
   app.use("/graphql", await createGraphQLRouter());
 

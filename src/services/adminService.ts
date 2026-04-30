@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import bcrypt from "bcrypt";
 
 import { prisma } from "../prisma/client";
 import { AppError } from "../utils/AppError";
@@ -151,4 +152,31 @@ export async function hardDeleteGroup(groupId: number, reason?: string) {
 
     return deletedGroup;
   });
+}
+
+export async function createAdmin(username: string, password: string) {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return prisma.admin.create({
+    data: {
+      username,
+      password: hashedPassword
+    }
+  });
+}
+
+export async function authenticateAdmin(username: string, password: string) {
+  const admin = await prisma.admin.findUnique({
+    where: { username }
+  });
+
+  if (!admin) {
+    throw new AppError("Invalid credentials", StatusCodes.UNAUTHORIZED);
+  }
+
+  const isValid = await bcrypt.compare(password, admin.password);
+  if (!isValid) {
+    throw new AppError("Invalid credentials", StatusCodes.UNAUTHORIZED);
+  }
+
+  return admin;
 }

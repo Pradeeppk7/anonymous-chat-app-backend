@@ -37,7 +37,7 @@ async function createApp() {
     app.use("/api/groups", groupRoutes_1.groupRoutes);
     app.use("/api/groups", messageRoutes_1.messageRoutes);
     app.use("/api/messages", reportRoutes_1.reportRoutes);
-    app.use("/api/admin", adminAuth_1.adminAuth, adminRoutes_1.adminRoutes);
+    app.use("/api/admin", (req, res, next) => (0, adminAuth_1.adminAuth)(req, res, next), adminRoutes_1.adminRoutes);
     app.use("/playground", graphqlPlaygroundRoutes_1.graphqlPlaygroundRoutes);
     app.use("/graphql", await (0, router_1.createGraphQLRouter)());
     app.use(notFoundHandler_1.notFoundHandler);
