@@ -34,6 +34,11 @@ export async function reportMessage(messageId: number, reason: string) {
 
 export async function listReports() {
   return prisma.report.findMany({
+    where: {
+      message: {
+        isDeleted: false
+      }
+    },
     orderBy: {
       createdAt: "desc"
     },
