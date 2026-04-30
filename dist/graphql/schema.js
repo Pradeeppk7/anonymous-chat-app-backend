@@ -44,5 +44,6 @@ exports.typeDefs = `#graphql
     deleteMessage(messageId: Int!, reason: String): Message!
     deleteGroup(groupId: Int!, reason: String): Group!
     activateGroup(groupId: Int!, reason: String): Group!
+    hardDeleteGroup(groupId: Int!, reason: String): Group!
   }
 `;

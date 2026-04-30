@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMessage = deleteMessage;
 exports.deleteGroup = deleteGroup;
 exports.activateGroup = activateGroup;
+exports.hardDeleteGroup = hardDeleteGroup;
 const http_status_codes_1 = require("http-status-codes");
 const client_1 = require("../prisma/client");
 const AppError_1 = require("../utils/AppError");
@@ -104,5 +105,31 @@ async function activateGroup(groupId, reason) {
             }
         });
         return updatedGroup;
+    });
+}
+async function hardDeleteGroup(groupId, reason) {
+    const group = await client_1.prisma.group.findUnique({
+        where: {
+            id: groupId
+        }
+    });
+    if (!group) {
+        throw new AppError_1.AppError("Group not found", http_status_codes_1.StatusCodes.NOT_FOUND);
+    }
+    return client_1.prisma.$transaction(async (tx) => {
+        const deletedGroup = await tx.group.delete({
+            where: {
+                id: groupId
+            }
+        });
+        await tx.adminAction.create({
+            data: {
+                actionType: "hard-delete",
+                targetType: "group",
+                targetId: groupId,
+                reason: normalizeReason(reason)
+            }
+        });
+        return deletedGroup;
     });
 }

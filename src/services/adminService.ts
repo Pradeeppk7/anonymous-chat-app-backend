@@ -121,3 +121,34 @@ export async function activateGroup(groupId: number, reason?: string) {
     return updatedGroup;
   });
 }
+
+export async function hardDeleteGroup(groupId: number, reason?: string) {
+  const group = await prisma.group.findUnique({
+    where: {
+      id: groupId
+    }
+  });
+
+  if (!group) {
+    throw new AppError("Group not found", StatusCodes.NOT_FOUND);
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const deletedGroup = await tx.group.delete({
+      where: {
+        id: groupId
+      }
+    });
+
+    await tx.adminAction.create({
+      data: {
+        actionType: "hard-delete",
+        targetType: "group",
+        targetId: groupId,
+        reason: normalizeReason(reason)
+      }
+    });
+
+    return deletedGroup;
+  });
+}

@@ -57,7 +57,8 @@ exports.resolvers = {
         reportMessage: async (_parent, args) => reportService.reportMessage(args.messageId, args.reason),
         deleteMessage: async (_parent, args) => adminService.deleteMessage(args.messageId, args.reason),
         deleteGroup: async (_parent, args) => adminService.deleteGroup(args.groupId, args.reason),
-        activateGroup: async (_parent, args) => adminService.activateGroup(args.groupId, args.reason)
+        activateGroup: async (_parent, args) => adminService.activateGroup(args.groupId, args.reason),
+        hardDeleteGroup: async (_parent, args) => adminService.hardDeleteGroup(args.groupId, args.reason)
     },
     Group: {
         messages: async (parent) => client_1.prisma.message.findMany({

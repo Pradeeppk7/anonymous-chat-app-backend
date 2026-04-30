@@ -31,7 +31,9 @@ export const resolvers = {
     deleteGroup: async (_parent: unknown, args: { groupId: number; reason?: string }) =>
       adminService.deleteGroup(args.groupId, args.reason),
     activateGroup: async (_parent: unknown, args: { groupId: number; reason?: string }) =>
-      adminService.activateGroup(args.groupId, args.reason)
+      adminService.activateGroup(args.groupId, args.reason),
+    hardDeleteGroup: async (_parent: unknown, args: { groupId: number; reason?: string }) =>
+      adminService.hardDeleteGroup(args.groupId, args.reason)
   },
   Group: {
     messages: async (parent: { id: number }) =>
