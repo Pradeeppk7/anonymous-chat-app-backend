@@ -53,5 +53,13 @@ export const resolvers = {
           createdAt: "desc"
         }
       })
+  },
+  Report: {
+    message: async (parent: { messageId: number }) =>
+      prisma.message.findUnique({
+        where: {
+          id: parent.messageId
+        }
+      })
   }
 };

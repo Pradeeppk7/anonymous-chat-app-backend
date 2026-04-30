@@ -24,6 +24,7 @@ export const typeDefs = `#graphql
     reason: String!
     status: String!
     createdAt: String!
+    message: Message
   }
 
   type Query {
